@@ -1,14 +1,12 @@
-package ru.sumin.composition.presentation
+package com.example.composition.presentation
 
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import com.example.composition.databinding.FragmentGameFinishedBinding
 import com.example.composition.domain.entity.GameResult
-import com.example.composition.presentation.ChooseLevelFragment
 import java.lang.RuntimeException
 
 class GameFinishedFragment : Fragment() {
@@ -46,7 +44,7 @@ class GameFinishedFragment : Fragment() {
 
     companion object{
         const val KEY_GAME_RESULT = "game_result"
-        fun newInstance(gameResult: GameResult):GameFinishedFragment{
+        fun newInstance(gameResult: GameResult): GameFinishedFragment {
             return GameFinishedFragment().apply {
                 arguments = Bundle().apply {
                     putSerializable(KEY_GAME_RESULT,gameResult)
