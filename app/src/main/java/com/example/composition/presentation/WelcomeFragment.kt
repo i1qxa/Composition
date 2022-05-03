@@ -1,4 +1,4 @@
-package ru.sumin.composition.presentation
+package com.example.composition.presentation
 
 import android.os.Bundle
 import android.view.LayoutInflater

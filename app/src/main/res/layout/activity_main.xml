@@ -5,6 +5,6 @@
     android:id="@+id/main_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:name="ru.sumin.composition.presentation.WelcomeFragment"
+    android:name="com.example.composition.presentation.WelcomeFragment"
     tools:context=".presentation.MainActivity"
     />

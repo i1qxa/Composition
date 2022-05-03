@@ -1,4 +1,4 @@
-package ru.sumin.composition.presentation
+package com.example.composition.presentation
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -10,7 +10,6 @@ import com.example.composition.databinding.FragmentGameBinding
 import com.example.composition.domain.entity.GameResult
 import com.example.composition.domain.entity.GameSettings
 import com.example.composition.domain.entity.Level
-import com.example.composition.presentation.GameFinishedFragment
 import java.lang.RuntimeException
 
 class GameFragment : Fragment() {
@@ -69,7 +68,7 @@ class GameFragment : Fragment() {
 
         private const val KEY_LEVEL = "level"
 
-        fun newInstance(level:Level):GameFragment{
+        fun newInstance(level:Level): GameFragment {
             return GameFragment().apply {
                 arguments = Bundle().apply {
                     putParcelable(KEY_LEVEL, level)

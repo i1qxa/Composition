@@ -1,4 +1,4 @@
-package ru.sumin.composition.presentation
+package com.example.composition.presentation
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle

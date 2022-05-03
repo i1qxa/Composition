@@ -8,7 +8,6 @@ import androidx.fragment.app.Fragment
 import com.example.composition.R
 import com.example.composition.databinding.FragmentChooseLevelBinding
 import com.example.composition.domain.entity.Level
-import ru.sumin.composition.presentation.GameFragment
 import java.lang.RuntimeException
 
 class ChooseLevelFragment : Fragment() {
