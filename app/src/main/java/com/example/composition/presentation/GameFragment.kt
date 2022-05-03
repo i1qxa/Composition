@@ -5,14 +5,18 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import com.example.composition.R
 import com.example.composition.databinding.FragmentGameBinding
 import com.example.composition.domain.entity.GameResult
 import com.example.composition.domain.entity.GameSettings
 import com.example.composition.domain.entity.Level
+import com.example.composition.domain.entity.Question
 import java.lang.RuntimeException
 
 class GameFragment : Fragment() {
+    private lateinit var viewModel: GameFragmentViewModel
+    private lateinit var gameSettings: GameSettings
     private lateinit var level: Level
     private var _binding: FragmentGameBinding? = null
     private val binding: FragmentGameBinding
@@ -33,6 +37,11 @@ class GameFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        viewModel = ViewModelProvider(this)[GameFragmentViewModel::class.java]
+        gameSettings = viewModel.getGameSettingsUseCase(level)
+        viewModel.gameSettings.value = viewModel.getGameSettingsUseCase(level)
+        generateNewQuestion()
+        observeViewModel()
         binding.tvSum.setOnClickListener {
             launchGameFinishFragment(
                 GameResult(
@@ -47,6 +56,40 @@ class GameFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun generateNewQuestion(){
+        viewModel.question.value = viewModel.generateQuestionUseCase(gameSettings.maxSumValue)
+    }
+
+    private fun observeViewModel(){
+        viewModel.question.observe(viewLifecycleOwner){
+            setupQuestionViews(it)
+        }
+    }
+
+    private fun setupQuestionViews(question: Question){
+        binding.tvSum.text = question.sum.toString()
+        binding.tvLeftNumber.text = question.visibleNumber.toString()
+        binding.tvOption1.text = question.option[0].toString()
+        binding.tvOption1.setOnClickListener {optionClickListener(question.option[0])}
+        binding.tvOption2.text = question.option[1].toString()
+        binding.tvOption2.setOnClickListener {optionClickListener(question.option[1])}
+        binding.tvOption3.text = question.option[2].toString()
+        binding.tvOption3.setOnClickListener {optionClickListener(question.option[2])}
+        binding.tvOption4.text = question.option[3].toString()
+        binding.tvOption4.setOnClickListener {optionClickListener(question.option[3])}
+        binding.tvOption5.text = question.option[4].toString()
+        binding.tvOption5.setOnClickListener {optionClickListener(question.option[4])}
+        binding.tvOption6.text = question.option[5].toString()
+        binding.tvOption6.setOnClickListener {optionClickListener(question.option[5])}
+    }
+
+    private fun optionClickListener(answer:Int){
+        val visibleCount = binding.tvLeftNumber.text.toString().toInt()
+        val sum = binding.tvSum.text.toString().toInt()
+        viewModel.checkAnswer(answer, visibleCount,sum)
+        generateNewQuestion()
     }
 
     private fun launchGameFinishFragment(gameResult: GameResult){
