@@ -51,7 +51,7 @@ object GameRepositoryImpl:GameRepository {
                     20,
                     7,
                     70,
-                    20
+                    30
                 )
             }
             else ->{
@@ -59,7 +59,7 @@ object GameRepositoryImpl:GameRepository {
                     50,
                     10,
                     90,
-                    20
+                    40
                 )
             }
         }

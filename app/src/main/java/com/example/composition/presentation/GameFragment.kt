@@ -1,6 +1,8 @@
 package com.example.composition.presentation
 
+import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -42,15 +44,7 @@ class GameFragment : Fragment() {
         viewModel.gameSettings.value = viewModel.getGameSettingsUseCase(level)
         generateNewQuestion()
         observeViewModel()
-        binding.tvSum.setOnClickListener {
-            launchGameFinishFragment(
-                GameResult(
-                    true,
-                    16,
-                    20,
-                    GameSettings(30,14,75,60)
-            ))
-        }
+        viewModel.startTimer(gameSettings.gameTimeInSeconds * 1000)
     }
 
     override fun onDestroyView() {
@@ -62,11 +56,30 @@ class GameFragment : Fragment() {
         viewModel.question.value = viewModel.generateQuestionUseCase(gameSettings.maxSumValue)
     }
 
+    @SuppressLint("SetTextI18n")
     private fun observeViewModel(){
         viewModel.question.observe(viewLifecycleOwner){
             setupQuestionViews(it)
         }
+        viewModel.currentResult.observe(viewLifecycleOwner){
+            if (it.second >0) {
+                val percentOfRightAnswers = viewModel.percentOfRightAnswers(it)
+                binding.tvAnswersProgress.text = "Правильных ответов $percentOfRightAnswers % " +
+                        "минимум(${gameSettings.minPercentOfRightAnswers}%)"
+                binding.progressBar.setProgress(percentOfRightAnswers, true)
+            }
+        }
+        viewModel.lastTime.observe(viewLifecycleOwner){
+            binding.tvTimer.text = it.toString()
+        }
+        viewModel.isFinished.observe(viewLifecycleOwner){
+            if (it){
+                launchGameFinishFragment(viewModel.getReadyGameResult(gameSettings))
+               }
+        }
     }
+
+
 
     private fun setupQuestionViews(question: Question){
         binding.tvSum.text = question.sum.toString()
