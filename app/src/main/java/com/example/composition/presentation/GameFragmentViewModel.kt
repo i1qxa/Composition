@@ -1,7 +1,6 @@
 package com.example.composition.presentation
 
 import android.os.CountDownTimer
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -11,6 +10,7 @@ import com.example.composition.domain.entity.GameSettings
 import com.example.composition.domain.entity.Question
 import com.example.composition.domain.usecases.GenerateQuestionUseCase
 import com.example.composition.domain.usecases.GetGameSettingsUseCase
+import java.lang.RuntimeException
 
 class GameFragmentViewModel:ViewModel() {
     private val repository = GameRepositoryImpl
@@ -34,13 +34,12 @@ class GameFragmentViewModel:ViewModel() {
     }
 
     fun percentOfRightAnswers(pair: Pair<Int,Int>): Int{
-        Log.d("Answer", "${pair.second} / ${pair.first}  Процент" + ((pair.second / pair.first) * 100).toString())
         return ((pair.second.toDouble() / pair.first.toDouble()) * 100).toInt()
 
     }
 
-    fun startTimer(timeForGameRound:Int){
-        val timer = object : CountDownTimer(20000,1000){
+    fun startTimer(timeForGameRound:Long){
+        val timer = object : CountDownTimer(timeForGameRound,1000){
             override fun onTick(p0: Long) {
                 lastTime.value = p0.toInt() / 1000
             }
@@ -52,11 +51,22 @@ class GameFragmentViewModel:ViewModel() {
         timer.start()
     }
 
-    fun getReadyGameResult(gameSettings: GameSettings):GameResult{
+    fun getReadyGameResult():GameResult{
+        if (gameSettings.value == null){
+            throw RuntimeException("Game Settings is empty")
+        }
+        if (!checkGameResult()){
+            return GameResult(false,0,0, gameSettings.value!!)
+        }
+        val minPercentOfRightAnswers = gameSettings.value!!.minPercentOfRightAnswers
+        val minCountOfRightAnswers = gameSettings.value!!.minCountOfRightAnswers
         val currentRes = currentResult.value!!
-        val isWin = percentOfRightAnswers(currentRes) >= gameSettings.minPercentOfRightAnswers &&
-                currentRes.first >= gameSettings.minCountOfRightAnswers
-        return GameResult(isWin,currentRes.first, currentRes.second,gameSettings)
+        val isWin = percentOfRightAnswers(currentRes) >= minPercentOfRightAnswers &&
+                currentRes.first >= minCountOfRightAnswers
+        return GameResult(isWin,currentRes.first, currentRes.second,gameSettings.value!!)
+    }
+    private fun checkGameResult():Boolean{
+        return currentResult.value != null
     }
 
 

@@ -34,11 +34,22 @@ class GameFinishedFragment : Fragment() {
         binding.buttonRetry.setOnClickListener{
             retryGame()
         }
+        binding.tvRequiredAnswers.text = gameResult.gameSettings.minCountOfRightAnswers.toString()
+        binding.tvRequiredPercentage.text = gameResult.gameSettings.minPercentOfRightAnswers.toString()
+        binding.tvScorePercentage.text =
+            percentCurrentAnswers(gameResult.countOfQuestions.toDouble(),
+                gameResult.countOfRightAnswers.toDouble())
+        binding.tvScoreAnswers.text = gameResult.countOfRightAnswers.toString()
+
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun percentCurrentAnswers(countOfQuestions:Double, countOfRightAnswers:Double):String{
+        return ((countOfRightAnswers / countOfQuestions)/100).toInt().toString()
     }
 
     private fun parseArgs(){

@@ -18,7 +18,6 @@ import java.lang.RuntimeException
 
 class GameFragment : Fragment() {
     private lateinit var viewModel: GameFragmentViewModel
-    private lateinit var gameSettings: GameSettings
     private lateinit var level: Level
     private var _binding: FragmentGameBinding? = null
     private val binding: FragmentGameBinding
@@ -40,11 +39,10 @@ class GameFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         viewModel = ViewModelProvider(this)[GameFragmentViewModel::class.java]
-        gameSettings = viewModel.getGameSettingsUseCase(level)
         viewModel.gameSettings.value = viewModel.getGameSettingsUseCase(level)
         generateNewQuestion()
         observeViewModel()
-        viewModel.startTimer(gameSettings.gameTimeInSeconds * 1000)
+        viewModel.startTimer((viewModel.gameSettings.value!!.gameTimeInSeconds * 1000).toLong())
     }
 
     override fun onDestroyView() {
@@ -53,7 +51,8 @@ class GameFragment : Fragment() {
     }
 
     private fun generateNewQuestion(){
-        viewModel.question.value = viewModel.generateQuestionUseCase(gameSettings.maxSumValue)
+        viewModel.question.value = viewModel.generateQuestionUseCase(viewModel.gameSettings.value?.maxSumValue
+            ?: throw RuntimeException("Game Settings is empty"))
     }
 
     @SuppressLint("SetTextI18n")
@@ -65,7 +64,7 @@ class GameFragment : Fragment() {
             if (it.second >0) {
                 val percentOfRightAnswers = viewModel.percentOfRightAnswers(it)
                 binding.tvAnswersProgress.text = "Правильных ответов $percentOfRightAnswers % " +
-                        "минимум(${gameSettings.minPercentOfRightAnswers}%)"
+                        "минимум(${viewModel.gameSettings.value?.minPercentOfRightAnswers}%)"
                 binding.progressBar.setProgress(percentOfRightAnswers, true)
             }
         }
@@ -74,7 +73,8 @@ class GameFragment : Fragment() {
         }
         viewModel.isFinished.observe(viewLifecycleOwner){
             if (it){
-                launchGameFinishFragment(viewModel.getReadyGameResult(gameSettings))
+
+                launchGameFinishFragment(viewModel.getReadyGameResult())
                }
         }
     }
