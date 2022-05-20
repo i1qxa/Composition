@@ -1,6 +1,8 @@
 package com.example.composition.presentation
 
+import android.app.Application
 import android.os.CountDownTimer
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -12,7 +14,7 @@ import com.example.composition.domain.usecases.GenerateQuestionUseCase
 import com.example.composition.domain.usecases.GetGameSettingsUseCase
 import java.lang.RuntimeException
 
-class GameFragmentViewModel:ViewModel() {
+class GameViewModel(application: Application): AndroidViewModel(application) {
     private val repository = GameRepositoryImpl
     var question = MutableLiveData<Question>()
     val generateQuestionUseCase = GenerateQuestionUseCase(repository)
@@ -21,12 +23,14 @@ class GameFragmentViewModel:ViewModel() {
     val currentResult:LiveData<Pair<Int,Int>>
     get() = _currentResult
     var gameSettings = MutableLiveData<GameSettings>()
-    val lastTime = MutableLiveData<Int>()
+    val lastTime = MutableLiveData<String>()
     val isFinished = MutableLiveData(false)
+    private var countOfQuestions = 0
+    private var countOfRightAnswers = 0
 
     fun checkAnswer(answer:Int, visibleCount:Int, sum:Int) {
-        val countOfQuestions = _currentResult.value!!.first + 1
-        var countOfRightAnswers = _currentResult.value!!.second
+        countOfQuestions = _currentResult.value!!.first + 1
+        countOfRightAnswers = _currentResult.value!!.second
         if (answer + visibleCount == sum){
             countOfRightAnswers++
         }
@@ -39,9 +43,9 @@ class GameFragmentViewModel:ViewModel() {
     }
 
     fun startTimer(timeForGameRound:Long){
-        val timer = object : CountDownTimer(timeForGameRound,1000){
+        val timer = object : CountDownTimer(timeForGameRound ,1000){
             override fun onTick(p0: Long) {
-                lastTime.value = p0.toInt() / 1000
+                lastTime.value = formatTime(p0)
             }
 
             override fun onFinish() {
@@ -49,6 +53,14 @@ class GameFragmentViewModel:ViewModel() {
             }
         }
         timer.start()
+    }
+
+    private fun formatTime(time:Long):String{
+        val seconds = time / MILLIS_IN_SECONDS
+        val minutes = seconds / SECONDS_IN_MINUTES
+        val lastSeconds = seconds - (minutes * SECONDS_IN_MINUTES)
+        return String.format("%02d:%02d",minutes, lastSeconds)
+
     }
 
     fun getReadyGameResult():GameResult{
@@ -69,5 +81,9 @@ class GameFragmentViewModel:ViewModel() {
         return currentResult.value != null
     }
 
+    companion object{
+        private const val MILLIS_IN_SECONDS = 1000L
+        private const val SECONDS_IN_MINUTES = 60
+    }
 
 }

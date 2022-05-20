@@ -2,22 +2,37 @@ package com.example.composition.presentation
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
+import android.view.TextureView
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.composition.R
 import com.example.composition.databinding.FragmentGameBinding
 import com.example.composition.domain.entity.GameResult
-import com.example.composition.domain.entity.GameSettings
 import com.example.composition.domain.entity.Level
 import com.example.composition.domain.entity.Question
 import java.lang.RuntimeException
 
 class GameFragment : Fragment() {
-    private lateinit var viewModel: GameFragmentViewModel
+    private val viewModel: GameViewModel by lazy {
+        ViewModelProvider(
+            this,
+            ViewModelProvider.AndroidViewModelFactory.getInstance(requireActivity().application)
+        )[GameViewModel :: class.java]
+    }
+    private val tvOptions by lazy {
+        mutableListOf<TextView>().apply {
+            add(binding.tvOption1)
+            add(binding.tvOption2)
+            add(binding.tvOption3)
+            add(binding.tvOption4)
+            add(binding.tvOption5)
+            add(binding.tvOption6)
+        }
+    }
     private lateinit var level: Level
     private var _binding: FragmentGameBinding? = null
     private val binding: FragmentGameBinding
@@ -38,7 +53,6 @@ class GameFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel = ViewModelProvider(this)[GameFragmentViewModel::class.java]
         viewModel.gameSettings.value = viewModel.getGameSettingsUseCase(level)
         generateNewQuestion()
         observeViewModel()
@@ -63,18 +77,17 @@ class GameFragment : Fragment() {
         viewModel.currentResult.observe(viewLifecycleOwner){
             if (it.second >0) {
                 val percentOfRightAnswers = viewModel.percentOfRightAnswers(it)
-                binding.tvAnswersProgress.text = "Правильных ответов $percentOfRightAnswers % " +
+                  binding.tvAnswersProgress.text = "Правильных ответов $percentOfRightAnswers % " +
                         "минимум(${viewModel.gameSettings.value?.minPercentOfRightAnswers}%)"
                 binding.progressBar.setProgress(percentOfRightAnswers, true)
             }
         }
         viewModel.lastTime.observe(viewLifecycleOwner){
-            binding.tvTimer.text = it.toString()
+            binding.tvTimer.text = it
         }
         viewModel.isFinished.observe(viewLifecycleOwner){
             if (it){
-
-                launchGameFinishFragment(viewModel.getReadyGameResult())
+                    launchGameFinishFragment(viewModel.getReadyGameResult())
                }
         }
     }
@@ -84,29 +97,23 @@ class GameFragment : Fragment() {
     private fun setupQuestionViews(question: Question){
         binding.tvSum.text = question.sum.toString()
         binding.tvLeftNumber.text = question.visibleNumber.toString()
-        binding.tvOption1.text = question.option[0].toString()
-        binding.tvOption1.setOnClickListener {optionClickListener(question.option[0])}
-        binding.tvOption2.text = question.option[1].toString()
-        binding.tvOption2.setOnClickListener {optionClickListener(question.option[1])}
-        binding.tvOption3.text = question.option[2].toString()
-        binding.tvOption3.setOnClickListener {optionClickListener(question.option[2])}
-        binding.tvOption4.text = question.option[3].toString()
-        binding.tvOption4.setOnClickListener {optionClickListener(question.option[3])}
-        binding.tvOption5.text = question.option[4].toString()
-        binding.tvOption5.setOnClickListener {optionClickListener(question.option[4])}
-        binding.tvOption6.text = question.option[5].toString()
-        binding.tvOption6.setOnClickListener {optionClickListener(question.option[5])}
+        for (i in 0 until tvOptions.size){
+            tvOptions[i].text = question.option[i].toString()
+            tvOptions[i].setOnClickListener { optionClickListener(question.option[i]) }
+        }
+
     }
 
     private fun optionClickListener(answer:Int){
         val visibleCount = binding.tvLeftNumber.text.toString().toInt()
         val sum = binding.tvSum.text.toString().toInt()
-        viewModel.checkAnswer(answer, visibleCount,sum)
+        viewModel.run {
+            checkAnswer(answer, visibleCount,sum)
+        }
         generateNewQuestion()
     }
 
     private fun launchGameFinishFragment(gameResult: GameResult){
-
         requireActivity().supportFragmentManager.beginTransaction()
             .replace(R.id.main_container, GameFinishedFragment.newInstance(gameResult))
             .addToBackStack(null)
