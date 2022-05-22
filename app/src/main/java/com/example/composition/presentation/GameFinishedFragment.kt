@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import com.example.composition.R
 import com.example.composition.databinding.FragmentGameFinishedBinding
 import com.example.composition.domain.entity.GameResult
@@ -56,10 +57,6 @@ class GameFinishedFragment : Fragment() {
         _binding = null
     }
 
-    private fun percentCurrentAnswers(countOfQuestions:Double, countOfRightAnswers:Double):String{
-        return ((countOfRightAnswers / countOfQuestions)/100).toInt().toString()
-    }
-
     private fun parseArgs(){
         requireArguments().getParcelable<GameResult>(KEY_GAME_RESULT)?.let {
             gameResult = it
@@ -67,7 +64,7 @@ class GameFinishedFragment : Fragment() {
     }
 
     private fun retryGame(){
-        requireActivity().supportFragmentManager.popBackStack(ChooseLevelFragment.NAME,0)
+        findNavController().popBackStack()
     }
 
     companion object{
