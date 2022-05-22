@@ -5,16 +5,16 @@ import android.os.CountDownTimer
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import com.example.composition.data.GameRepositoryImpl
 import com.example.composition.domain.entity.GameResult
 import com.example.composition.domain.entity.GameSettings
+import com.example.composition.domain.entity.Level
 import com.example.composition.domain.entity.Question
 import com.example.composition.domain.usecases.GenerateQuestionUseCase
 import com.example.composition.domain.usecases.GetGameSettingsUseCase
 import java.lang.RuntimeException
 
-class GameViewModel(application: Application): AndroidViewModel(application) {
+class GameViewModel(application: Application, level: Level): AndroidViewModel(application) {
     private val repository = GameRepositoryImpl
     var question = MutableLiveData<Question>()
     val generateQuestionUseCase = GenerateQuestionUseCase(repository)
@@ -28,6 +28,17 @@ class GameViewModel(application: Application): AndroidViewModel(application) {
     private var countOfQuestions = 0
     private var countOfRightAnswers = 0
 
+    init {
+        gameSettings.value = getGameSettingsUseCase(level)
+        generateQuestion()
+        _currentResult.value = Pair(0,0)
+        startTimer(gameSettings.value!!.gameTimeInSeconds.toLong() * 1000)
+    }
+
+    fun generateQuestion(){
+        question.value = generateQuestionUseCase(gameSettings.value!!.maxSumValue)
+    }
+
     fun checkAnswer(answer:Int, visibleCount:Int, sum:Int) {
         countOfQuestions = _currentResult.value!!.first + 1
         countOfRightAnswers = _currentResult.value!!.second
@@ -38,9 +49,10 @@ class GameViewModel(application: Application): AndroidViewModel(application) {
     }
 
     fun percentOfRightAnswers(pair: Pair<Int,Int>): Int{
-        return ((pair.second.toDouble() / pair.first.toDouble()) * 100).toInt()
-
+        return if(pair.first<=0) 0
+        else ((pair.second.toDouble() / pair.first.toDouble()) * 100).toInt()
     }
+
 
     fun startTimer(timeForGameRound:Long){
         val timer = object : CountDownTimer(timeForGameRound ,1000){
@@ -68,14 +80,10 @@ class GameViewModel(application: Application): AndroidViewModel(application) {
             throw RuntimeException("Game Settings is empty")
         }
         if (!checkGameResult()){
-            return GameResult(false,0,0, gameSettings.value!!)
+            return GameResult(0,0, gameSettings.value!!)
         }
-        val minPercentOfRightAnswers = gameSettings.value!!.minPercentOfRightAnswers
-        val minCountOfRightAnswers = gameSettings.value!!.minCountOfRightAnswers
         val currentRes = currentResult.value!!
-        val isWin = percentOfRightAnswers(currentRes) >= minPercentOfRightAnswers &&
-                currentRes.first >= minCountOfRightAnswers
-        return GameResult(isWin,currentRes.first, currentRes.second,gameSettings.value!!)
+        return GameResult(currentRes.second, currentRes.first,gameSettings.value!!)
     }
     private fun checkGameResult():Boolean{
         return currentResult.value != null
