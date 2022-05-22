@@ -17,11 +17,10 @@ import com.example.composition.domain.entity.Question
 import java.lang.RuntimeException
 
 class GameFragment : Fragment() {
-    private val viewModel: GameViewModel by lazy {
-        ViewModelProvider(
-            this,
-            ViewModelProvider.AndroidViewModelFactory.getInstance(requireActivity().application)
-        )[GameViewModel :: class.java]
+    private lateinit var level: Level
+    private val viewModelFactory by lazy {GameViewModelFactory(level,requireActivity().application)}
+    private val viewModel: GameViewModel by lazy {ViewModelProvider(
+        this,viewModelFactory)[GameViewModel :: class.java]
     }
     private val tvOptions by lazy {
         mutableListOf<TextView>().apply {
@@ -33,7 +32,7 @@ class GameFragment : Fragment() {
             add(binding.tvOption6)
         }
     }
-    private lateinit var level: Level
+
     private var _binding: FragmentGameBinding? = null
     private val binding: FragmentGameBinding
     get() = _binding ?: throw RuntimeException("FragmentGameBinding == null")
@@ -53,21 +52,14 @@ class GameFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel.gameSettings.value = viewModel.getGameSettingsUseCase(level)
-        generateNewQuestion()
         observeViewModel()
-        viewModel.startTimer((viewModel.gameSettings.value!!.gameTimeInSeconds * 1000).toLong())
-    }
+        }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
 
-    private fun generateNewQuestion(){
-        viewModel.question.value = viewModel.generateQuestionUseCase(viewModel.gameSettings.value?.maxSumValue
-            ?: throw RuntimeException("Game Settings is empty"))
-    }
 
     @SuppressLint("SetTextI18n")
     private fun observeViewModel(){
@@ -75,12 +67,9 @@ class GameFragment : Fragment() {
             setupQuestionViews(it)
         }
         viewModel.currentResult.observe(viewLifecycleOwner){
-            if (it.second >0) {
-                val percentOfRightAnswers = viewModel.percentOfRightAnswers(it)
-                  binding.tvAnswersProgress.text = "Правильных ответов $percentOfRightAnswers % " +
-                        "минимум(${viewModel.gameSettings.value?.minPercentOfRightAnswers}%)"
-                binding.progressBar.setProgress(percentOfRightAnswers, true)
-            }
+            binding.tvAnswersProgress.text = getString(R.string.progress_answers,it.second.toString(),
+            viewModel.gameSettings.value!!.minCountOfRightAnswers.toString())
+            binding.progressBar.setProgress(viewModel.percentOfRightAnswers(it), true)
         }
         viewModel.lastTime.observe(viewLifecycleOwner){
             binding.tvTimer.text = it
@@ -110,7 +99,7 @@ class GameFragment : Fragment() {
         viewModel.run {
             checkAnswer(answer, visibleCount,sum)
         }
-        generateNewQuestion()
+        viewModel.generateQuestion()
     }
 
     private fun launchGameFinishFragment(gameResult: GameResult){
