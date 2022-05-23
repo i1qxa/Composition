@@ -21,6 +21,7 @@
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.21240942028985507" />
         <entry key="app/src/main/res/layout/fragment_game.xml" value="0.22916666666666666" />
         <entry key="app/src/main/res/layout/fragment_game_finished.xml" value="0.22916666666666666" />
+        <entry key="app/src/main/res/layout/fragment_welcome.xml" value="0.22916666666666666" />
       </map>
     </option>
   </component>
