@@ -32,20 +32,21 @@ class GameFinishedFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        binding.gameResult = gameResult
         with(binding) {
             buttonRetry.setOnClickListener {
                 retryGame()
             }
-            tvRequiredAnswers.text = getString(R.string.required_score,
-                gameResult.gameSettings.minCountOfRightAnswers.toString())
-            tvRequiredPercentage.text = getString(R.string.required_percentage,
-                gameResult.gameSettings.minPercentOfRightAnswers.toString())
-            tvScorePercentage.text = getString(R.string.score_percentage,
-                gameResult.percentOfRightAnswers.toString())
-            tvScoreAnswers.text = getString(R.string.score_answers,
-                gameResult.countOfRightAnswers.toString())
+//            tvRequiredAnswers.text = getString(R.string.required_score,
+//                gameResult.gameSettings.minCountOfRightAnswers.toString())
+//            tvRequiredPercentage.text = getString(R.string.required_percentage,
+//                gameResult.gameSettings.minPercentOfRightAnswers.toString())
+//            tvScorePercentage.text = getString(R.string.score_percentage,
+//                gameResult.percentOfRightAnswers.toString())
+//            tvScoreAnswers.text = getString(R.string.score_answers,
+//                gameResult.countOfRightAnswers.toString())
             emojiResult.setImageResource(
-                if (gameResult.isWin)R.drawable.ic_smile
+                if (gameResult!!.isWin)R.drawable.ic_smile
                 else R.drawable.ic_sad
             )
         }
