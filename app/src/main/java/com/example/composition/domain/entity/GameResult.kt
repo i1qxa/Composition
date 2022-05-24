@@ -14,9 +14,4 @@ data class GameResult(
         else ((countOfRightAnswers.toDouble()/countOfQuestions)*100).toInt()
     val isWin = (countOfRightAnswers>=gameSettings.minCountOfRightAnswers)&&
             (percentOfRightAnswers>=gameSettings.minPercentOfRightAnswers)
-    val countOfRightAnswersString:String
-        get() = countOfRightAnswers.toString()
-    val percentOfRightAnswersString:String
-        get() = percentOfRightAnswers.toString()
-
 }
