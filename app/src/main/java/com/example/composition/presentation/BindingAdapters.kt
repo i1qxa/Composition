@@ -5,6 +5,10 @@ import android.widget.TextView
 import androidx.databinding.BindingAdapter
 import com.example.composition.R
 
+interface OnOptionClickListener{
+    fun onOptionClick(option:Int)
+}
+
 @BindingAdapter("requiredAnswers")
 fun bindRequiredAnswers(textView: TextView,count:Int){
     textView.text = String.format(textView.context.getString(R.string.required_score,
@@ -31,4 +35,14 @@ fun bindImage(imageView: ImageView,isWin:Boolean){
         if (isWin)    R.drawable.ic_smile
         else R.drawable.ic_sad
     )
+}
+@BindingAdapter("numAsString")
+fun bindNumAsString(textView: TextView,count:Int){
+    textView.text = count.toString()
+}
+@BindingAdapter("onOptionClickListener")
+fun bindOnOptionClickListener(textView: TextView, clickListener: OnOptionClickListener){
+     textView.setOnClickListener {
+         clickListener.onOptionClick(textView.text.toString().toInt())
+     }
 }
