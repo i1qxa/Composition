@@ -1,10 +1,12 @@
 package com.example.composition.presentation
 
 import android.app.Application
+import android.content.Context
 import android.os.CountDownTimer
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.example.composition.R
 import com.example.composition.data.GameRepositoryImpl
 import com.example.composition.domain.entity.GameResult
 import com.example.composition.domain.entity.GameSettings
@@ -39,13 +41,14 @@ class GameViewModel(application: Application, level: Level): AndroidViewModel(ap
         question.value = generateQuestionUseCase(gameSettings.value!!.maxSumValue)
     }
 
-    fun checkAnswer(answer:Int, visibleCount:Int, sum:Int) {
+    fun checkAnswer(answer:Int) {
         countOfQuestions = _currentResult.value!!.first + 1
         countOfRightAnswers = _currentResult.value!!.second
-        if (answer + visibleCount == sum){
+        if (answer + question.value!!.visibleNumber == question.value!!.sum){
             countOfRightAnswers++
         }
         _currentResult.value = Pair(countOfQuestions,countOfRightAnswers)
+        generateQuestion()
     }
 
     fun percentOfRightAnswers(pair: Pair<Int,Int>): Int{
